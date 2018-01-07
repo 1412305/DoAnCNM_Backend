@@ -47,8 +47,8 @@ module.exports = function(app, express) {
        .put(userController.updateUser)
        .delete(userController.removeUser);
     
-    apiRoutes.route('/transactions')
-       .post(transactionController.createTransaction);
+    // apiRoutes.route('/transactions')
+    //    .post(transactionController.createTransaction);
 
     app.use('/api', apiRoutes);
 };
