@@ -3,6 +3,7 @@ var User = mongoose.model('User');
 var Address = mongoose.model('Address');
 var passwordHash = require('password-hash');
 var axios = require('axios');
+var jwt = require('jsonwebtoken');
 
 exports.listUsers = function(req, res) {
     User.find({}, function(err, result) {

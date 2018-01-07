@@ -1,19 +1,50 @@
-module.exports = function(app) {
+module.exports = function(app, express) {
+    var apiRoutes = express.Router(); 
     var userController = require('../controllers/user-controller');
-    // var transactionController = require('../controllers/transaction-controller')
+    var jwt = require('jsonwebtoken');
+    
+    apiRoutes.route('/login')
+       .post(userController.login);
 
-    app.route('/users')
+    // route middleware to verify a token
+    apiRoutes.use(function(req, res, next) {
+
+        // check header or url parameters or post parameters for token
+        var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+        // decode token
+        if (token) {
+
+            // verifies secret and checks exp
+            jwt.verify(token, "superSecret", function(err, decoded) {      
+            if (err) {
+                return res.json({ success: false, message: 'Failed to authenticate token.' });    
+            } else {
+                // if everything is good, save to request for use in other routes
+                req.decoded = decoded;    
+                next();
+            }
+            });
+
+        } else {
+
+            // if there is no token
+            // return an error
+            return res.status(403).send({ 
+                success: false, 
+                message: 'No token provided.' 
+            });
+
+        }
+    });
+
+    apiRoutes.route('/users')
        .get(userController.listUsers)
        .post(userController.addUser);
-    app.route('/user/:id')
+    apiRoutes.route('/user/:id')
        .get(userController.getUser)
        .put(userController.updateUser)
        .delete(userController.removeUser);
-    app.route('/login')
-       .post(userController.login);
-
-    // app.route('/transactions')
-    //    .get(transactionController.listAllTrans)
-    // app.route('/transaction/:username')
-    //    .get(transactionController.listTrans)
+       
+    app.use('/api', apiRoutes);
 };

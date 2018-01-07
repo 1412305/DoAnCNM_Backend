@@ -15,7 +15,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect(url);
 
 var routes = require('./routes/route');
-routes(app); 
+routes(app, express); 
 
 app.listen();
 
