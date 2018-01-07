@@ -5,7 +5,8 @@ var schema = new Schema({
     hash: String,
     toAddress: { type: Schema.Types.ObjectId, ref: 'Address' },
     value: Number,
-    confirm_at: {type: Date, default: Date.now}
+    confirm_at: {type: Date, default: Date.now},
+    index: Number
 });
 
 module.exports = mongoose.model('TransactionReceive', schema);

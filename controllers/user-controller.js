@@ -4,6 +4,7 @@ var Address = mongoose.model('Address');
 var passwordHash = require('password-hash');
 var axios = require('axios');
 var jwt = require('jsonwebtoken');
+var utils = require('../services/utils');
 
 exports.listUsers = function(req, res) {
     User.find({}, function(err, result) {
@@ -27,11 +28,19 @@ exports.addUser = function(req, res) {
             }
             res.json(user);
         });
+        // Create address for receive
         var newAddress = new Address({
             addressName: response.data.address
         })
-        newAddress.ofUser.push(newUser);
+        newAddress.ofUser = newUser;
         newAddress.save();
+        // // Create address for receive excess money
+        // var newExessAddress = new Address({
+        //     addressName: utils().generateAddress(response.data.publicKey), 
+        //     isAddressForExcessCash: true
+        // });
+        // newExessAddress.ofUser = newUser;
+        // newExessAddress.save();
     })
     .catch(error => {
         console.log(error);
@@ -62,6 +71,10 @@ exports.login = function(req, res) {
 					token: token
 				});
             }
+            else {
+                res.status(200).send({msg: "Invalid email or password!"});
+            }
+                
     });
 }; 
 
