@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('doancnm-backend:server');
+var debug = require('debug')('bin:server');
 var http = require('http');
 
 /**
