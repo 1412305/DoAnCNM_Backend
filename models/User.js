@@ -8,7 +8,9 @@ var schema = new Schema({
     password: String,
     publicKey: String,
     privateKey: String,
-    balance: {type: Number, default: 0} ,
+    availableBalance: {type: Number, default: 0},
+    actualBalance: {type: Number, default: 0},
+    authority: {type: String, default: 'user'}
 });
 schema.plugin(uniqueValidator);
 

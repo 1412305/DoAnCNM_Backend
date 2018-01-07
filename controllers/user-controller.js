@@ -21,6 +21,12 @@ exports.addUser = function(req, res) {
     .then(response => {
         newUser.publicKey = response.data.publicKey;
         newUser.privateKey = response.data.privateKey;
+        newUser.save(function(err, user) {
+            if (err) {
+                res.send(err);
+            }
+            res.json(user);
+        });
         var newAddress = new Address({
             addressName: response.data.address
         })
@@ -30,13 +36,6 @@ exports.addUser = function(req, res) {
     .catch(error => {
         console.log(error);
       });
-    
-    newUser.save(function(err, user) {
-        if (err) {
-            res.send(err);
-        }
-        res.json(user);
-    });
 };
 
 exports.login = function(req, res) {
@@ -56,6 +55,10 @@ exports.login = function(req, res) {
                 });
                 res.json({
 					message: 'Enjoy your token!',
+                    name: user.name,
+                    email: user.email,
+                    availableBalance: user.availableBalance,
+                    actualBalance: user.actualBalance,
 					token: token
 				});
             }

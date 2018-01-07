@@ -3,7 +3,8 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('cors');
 var User = require('./models/User');
-var User = require('./models/Address');
+var Address = require('./models/Address');
+var TransactionReceive = require('./models/TransactionReceive');
 var app = express();
 
 app.use(cors());

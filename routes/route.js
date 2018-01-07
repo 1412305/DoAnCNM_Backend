@@ -1,11 +1,12 @@
 module.exports = function(app, express) {
     var apiRoutes = express.Router(); 
     var userController = require('../controllers/user-controller');
+    var transactionController = require('../controllers/tracsaction-controller');
     var jwt = require('jsonwebtoken');
     
     apiRoutes.route('/login')
        .post(userController.login);
-
+    apiRoutes.route('/users').post(userController.addUser);
     // route middleware to verify a token
     apiRoutes.use(function(req, res, next) {
 
@@ -40,11 +41,14 @@ module.exports = function(app, express) {
 
     apiRoutes.route('/users')
        .get(userController.listUsers)
-       .post(userController.addUser);
+      
     apiRoutes.route('/user/:id')
        .get(userController.getUser)
        .put(userController.updateUser)
        .delete(userController.removeUser);
-       
+    
+    apiRoutes.route('/transactions')
+       .post(transactionController.createTransaction);
+
     app.use('/api', apiRoutes);
 };
