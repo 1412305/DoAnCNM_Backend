@@ -4,7 +4,7 @@ var Address = mongoose.model('Address');
 var User = mongoose.model('User');
 var axios = require('axios');
 var jwt = require('jsonwebtoken');
-var transactionsService = require('../services/transactions');
+var transactionService = require('../services/transactions');
 var utils = require('../services/utils');
 
 var createDataForTransaction = function(listAddressSend, listAddressReceive) {
@@ -21,7 +21,7 @@ var createDataForTransaction = function(listAddressSend, listAddressReceive) {
         })
     }, this);
 
-    listAddressSend.forEach(function(element, index, array){
+    listAddressSend.forEach(function(element){
         var inputString = {
             "unlockScript": "",
             "referencedOutputHash": "",
@@ -46,7 +46,14 @@ var createDataForTransaction = function(listAddressSend, listAddressReceive) {
                 // )
                 // inputString.unlockScript = "PUB " + user.publicKey + " SIG " + signature;
                 transactionData.inputs.push(inputString)
-                console.log(index);
+                if ((transactionData.inputs.length == listAddressSend.length) && (transactionData.outputs.length == listAddressReceive.length))
+                {
+                    var data = transactionService().sign(transactionData, {
+                        "publicKey": user.publicKey,
+                        "privateKey": user.privateKey
+                    });
+                    console.log(data);
+                }
             })
         })
     })
