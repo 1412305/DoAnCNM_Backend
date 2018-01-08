@@ -22,25 +22,19 @@ exports.addUser = function(req, res) {
     .then(response => {
         newUser.publicKey = response.data.publicKey;
         newUser.privateKey = response.data.privateKey;
-        newUser.save(function(err, user) {
-            if (err) {
-                res.send(err);
-            }
-            res.json(user);
-        });
         // Create address for receive
         var newAddress = new Address({
             addressName: response.data.address
         })
         newAddress.ofUser = newUser;
         newAddress.save();
-        // // Create address for receive excess money
-        // var newExessAddress = new Address({
-        //     addressName: utils().generateAddress(response.data.publicKey), 
-        //     isAddressForExcessCash: true
-        // });
-        // newExessAddress.ofUser = newUser;
-        // newExessAddress.save();
+        newUser.address = newAddress;
+        newUser.save(function(err, user) {
+            if (err) {
+                res.send(err);
+            }
+            res.json(user);
+        });
     })
     .catch(error => {
         console.log(error);
@@ -62,14 +56,20 @@ exports.login = function(req, res) {
                 var token = jwt.sign(payload, 'superSecret', {
                     expiresIn: 86400 // expires in 24 hours
                 });
-                res.json({
-					message: 'Enjoy your token!',
-                    name: user.name,
-                    email: user.email,
-                    availableBalance: user.availableBalance,
-                    actualBalance: user.actualBalance,
-					token: token
-				});
+
+                //Get address of user
+                Address.findById(user.address, function(err, address) {
+                    res.json({
+                        message: 'Enjoy your token!',
+                        name: user.name,
+                        email: user.email,
+                        address: address,
+                        authority: user.authority,
+                        availableBalance: user.availableBalance,
+                        actualBalance: user.actualBalance,
+                        token: token
+                    });
+                })
             }
             else {
                 res.status(200).send({msg: "Invalid email or password!"});
