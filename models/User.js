@@ -10,7 +10,7 @@ var schema = new Schema({
     availableBalance: {type: Number, default: 0},
     actualBalance: {type: Number, default: 0},
     authority: {type: String, default: 'user'},
-    address:  {type: Schema.Types.ObjectId, ref: 'Address'},
+    address: String,
     active: Boolean
 });
 schema.plugin(uniqueValidator);

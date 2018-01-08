@@ -2,6 +2,7 @@ module.exports = function(app, express) {
     var apiRoutes = express.Router(); 
     var userController = require('../controllers/user-controller');
     var transactionController = require('../controllers/tracsaction-controller');
+    var addressController = require('../controllers/address-controller');
     var jwt = require('jsonwebtoken');
     
     apiRoutes.route('/login')
@@ -40,8 +41,12 @@ module.exports = function(app, express) {
     });
     apiRoutes.route('/transactions')
        .post(transactionController.createTransaction);
+    
+    apiRoutes.route('/addresses')
+        .get(addressController.listAddresses);    
+
     apiRoutes.route('/users')
-       .get(userController.listUsers)
+       .get(userController.listUsers);
       
     apiRoutes.route('/user/:id')
        .get(userController.getUser)

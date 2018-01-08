@@ -7,11 +7,22 @@ var jwt = require('jsonwebtoken');
 var utils = require('../services/utils');
 
 exports.listUsers = function(req, res) {
+    if (decode.authority != "admin")
+        return;
     User.find({}, function(err, result) {
         if (err) {
             res.send(err);
         }
-        res.json(result);
+        responseData = [];
+        result.forEach(function(element) {
+            responseData.push({
+                email: element.email,
+                availableBalance: element.availableBalance,
+                actualBalance: element.actualBalance,
+                authority: element.authority,
+                address: element.address
+            });
+        })
     });
 };
 
@@ -22,19 +33,20 @@ exports.addUser = function(req, res) {
     .then(response => {
         newUser.publicKey = response.data.publicKey;
         newUser.privateKey = response.data.privateKey;
-        // Create address for receive
-        var newAddress = new Address({
-            addressName: response.data.address
-        })
-        newAddress.ofUser = newUser;
-        newAddress.save();
-        newUser.address = newAddress;
         newUser.save(function(err, user) {
             if (err) {
                 res.send(err);
             }
             res.json(user);
         });
+        // Create address for receive
+        var newAddress = new Address({
+            addressName: response.data.address
+        })
+        newAddress.ofUser = newUser;
+        newAddress.save();
+        newUser.address = newAddress.addressName;
+        newUser.save();
     })
     .catch(error => {
         console.log(error);
@@ -51,7 +63,8 @@ exports.login = function(req, res) {
             if(passwordHash.verify(passwordLogin, user.password)) {
                 var payload = {
                     name: user.name,
-                    email: user.email
+                    email: user.email,
+                    authority: user.authority
                 }
                 var token = jwt.sign(payload, 'superSecret', {
                     expiresIn: 86400 // expires in 24 hours
@@ -63,7 +76,7 @@ exports.login = function(req, res) {
                         message: 'Enjoy your token!',
                         name: user.name,
                         email: user.email,
-                        address: address,
+                        address: address.addressName,
                         authority: user.authority,
                         availableBalance: user.availableBalance,
                         actualBalance: user.actualBalance,
