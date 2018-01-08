@@ -62,7 +62,7 @@ exports.createTransaction = function(req, res) {
     
     Address.find().exec(function(err, addresses) {
         let listAddress = [];
-        
+        let excessAddress = '';
         addresses.sort(function(a, b) {
             return a.balance - b.balance;
         })
@@ -72,9 +72,14 @@ exports.createTransaction = function(req, res) {
                 totalValue -= addresses[i].balance;
                 listAddress.push(addresses[i]);
                 if (totalValue <= 0) { 
-                    
+                    if (i != addresses.length-1) {
+                        excessAddress = addresses[i+1].addressName;
+                    }
                     break;
                 }
+            }
+            else { 
+                excessAddress = addresses[i].addressName;
             }
         }
         if (totalValue > 0)
@@ -82,7 +87,7 @@ exports.createTransaction = function(req, res) {
                 "msg": "Invalid value!"
             });
         if (totalValue < 0) {
-            var excessAddress = '';
+            
             if (addresses.length == listAddress.length) {
                 User.findOne({email: req.decoded.email}, function(err, result) {
                     if (err) {
@@ -109,7 +114,6 @@ exports.createTransaction = function(req, res) {
                 });
             }
             else {
-                excessAddress = addresses[i+1].addressName;
                 createDataForTransaction(listAddress, [
                     {
                         "address": receiveAddress,
