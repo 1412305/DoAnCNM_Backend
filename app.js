@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var cors = require('cors');
 var User = require('./models/User');
 var Address = require('./models/Address');
-var TransactionReceive = require('./models/TransactionReceive');
+var Transaction = require('./models/Transaction');
 var app = express();
 
 app.use(cors());

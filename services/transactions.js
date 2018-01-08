@@ -1,8 +1,8 @@
 const Promise = require('bluebird');
 const bigInt = require('big-integer');
 const _ = require('lodash');
-
-module.exports = exports = ({ db, utils, events }) => {
+const utils = require('./utils');
+module.exports = exports = () => {
     const TABLE_NAME = 'transactions';
     const INPUT_TABLE_NAME = 'transaction_inputs';
     const OUTPUT_TABLE_NAME = 'transaction_outputs';
@@ -105,12 +105,14 @@ module.exports = exports = ({ db, utils, events }) => {
     // Sign transaction
     let sign = function (transaction, keys) {
         let message = toBinary(transaction, true);
+        // console.log(transaction);
         transaction.inputs.forEach((input, index) => {
         let key = keys[index];
-        let signature = utils.sign(message, key.privateKey);
+        let signature = utils().sign(message, key.privateKey);
         // Genereate unlock script
         input.unlockScript = 'PUB ' + key.publicKey + ' SIG ' + signature;
         });
+        return transaction;
     };
 
     // 1. Check syntactic correctness
