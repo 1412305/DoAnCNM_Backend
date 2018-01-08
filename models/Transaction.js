@@ -3,9 +3,15 @@ var Schema = mongoose.Schema;
 
 var schema = new Schema({
     hash: String,
-    fromAddresses: [{type: Schema.Types.ObjectId, ref: 'Address' }],
-    toAddresses: [{type: Schema.Types.ObjectId, ref: 'Address' }],
-    value: Number,
+    inputs: [{
+        address: String,
+        referenceOutputHash: String,
+        referenceOutputIndex: Number
+    }],
+    outputs: [{
+        value: Number,
+        address: String
+    }],
     created_at: {type: Date, default: Date.now},
     status: {type: String, default: 'unconfirmed'}
 });
