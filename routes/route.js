@@ -40,7 +40,8 @@ module.exports = function(app, express) {
         }
     });
     apiRoutes.route('/transactions')
-       .post(transactionController.createTransaction);
+        .get(transactionController.listTransactions)
+        .post(transactionController.createTransaction);
     
     apiRoutes.route('/addresses')
         .get(addressController.listAddresses);    

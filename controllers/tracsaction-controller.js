@@ -155,3 +155,14 @@ exports.createTransaction = function(req, res) {
             });
     });
 };
+
+exports.listTransactions = function(req, res) {
+    if (req.decoded.authority != "admin")
+        return;
+    Transaction.find({}, function(err, result) {
+        if (err) {
+            res.send(err);
+        }
+        res.json(result);
+    });
+};

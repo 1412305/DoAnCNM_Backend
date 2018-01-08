@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 var utils = require('../services/utils');
 
 exports.listUsers = function(req, res) {
-    if (decode.authority != "admin")
+    if (req.decoded.authority != "admin")
         return;
     User.find({}, function(err, result) {
         if (err) {
