@@ -7,6 +7,7 @@ var Address = require('./models/Address');
 var TransactionReceive = require('./models/TransactionReceive');
 var app = express();
 
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -17,6 +18,14 @@ mongoose.connect(url);
 
 var routes = require('./routes/route');
 routes(app, express); 
+
+var WebSocket = require('ws');
+const ws = new WebSocket('https://api.kcoin.club/');
+
+ws.on('message', function incoming(data) {
+    console.log("asdas");
+    console.log(data);
+});
 
 app.listen();
 
