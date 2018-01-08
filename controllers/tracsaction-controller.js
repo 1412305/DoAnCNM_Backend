@@ -34,6 +34,8 @@ var createDataForTransaction = function(listAddressSend, listAddressReceive) {
             })
             inputString.referencedOutputHash = result[0].hash;
             inputString.referencedOutputIndex = result[0].index;
+            element.balance = 0;
+            element.save();
             User.findById(element.ofUser, function(err, user) {
                 if (err)
                     return;
@@ -66,7 +68,15 @@ exports.createTransaction = function(req, res) {
     if (!(totalValue && receiveAddress)) {
         res.status(400).json("Missing data for transaction")
     }
-    
+    User.findOne({email: req.decoded.email}, function(err, user) {
+        if (err) {
+            res.json({
+                "msg": "Invalid token!"
+            })
+        }
+        user.availableBalance -= totalValue;
+        user.save();
+    });
     Address.find().exec(function(err, addresses) {
         let listAddress = [];
         let excessAddress = '';
@@ -97,11 +107,6 @@ exports.createTransaction = function(req, res) {
             
             if (addresses.length == listAddress.length) {
                 User.findOne({email: req.decoded.email}, function(err, result) {
-                    if (err) {
-                        res.json({
-                            "msg": "Invalid token!"
-                        })
-                    }
                     var newAddress = new Address({
                         addressName: utils().generateAddress(result.publicKey)
                     })
