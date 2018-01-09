@@ -11,7 +11,8 @@ var schema = new Schema({
     actualBalance: {type: Number, default: 0},
     authority: {type: String, default: 'user'},
     address: String,
-    active: Boolean
+    active: {type:Boolean, default: false},
+    avtiveKey: String,
 });
 schema.plugin(uniqueValidator);
 

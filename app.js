@@ -5,6 +5,7 @@ var cors = require('cors');
 var User = require('./models/User');
 var Address = require('./models/Address');
 var Transaction = require('./models/Transaction');
+var UserVerifyKey = require('./models/UserVerifyKey');
 var app = express();
 
 app.use(cors());
@@ -36,9 +37,10 @@ setInterval(function(){
 function checkTime(ws) {
    ws.send("hello");
 }
-ws.on('disconnect', function(){
+ws.on('disconnect', function(){ 
     console.log("disconnect");
 });
+
 
 app.listen();
 

@@ -9,7 +9,8 @@ module.exports = function(app, express) {
        .post(userController.login);
     apiRoutes.route('/users').post(userController.addUser);
 
-
+    apiRoutes.route('/user/:id')
+        .get(userController.getUser)
     // route middleware to verify a token
     apiRoutes.use(function(req, res, next) {
 
@@ -48,9 +49,9 @@ module.exports = function(app, express) {
 
     apiRoutes.route('/users')
        .get(userController.listUsers);
+    
       
     apiRoutes.route('/user/:id')
-       .get(userController.getUser)
        .put(userController.updateUser)
        .delete(userController.removeUser);
     

@@ -66,6 +66,7 @@ var createDataForTransaction = function(res, listAddressSend, listAddressReceive
         })
     })
 }
+
 exports.createTransaction = function(req, res) {
     // param: token, value, address
     let totalValue = req.body.value;

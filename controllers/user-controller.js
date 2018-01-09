@@ -1,14 +1,24 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Address = mongoose.model('Address');
+var UserVerifyKey = mongoose.model('UserVerifyKey');
 var passwordHash = require('password-hash');
 var axios = require('axios');
 var jwt = require('jsonwebtoken');
 var utils = require('../services/utils');
+var nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+           user: 'doan.cnm2018@gmail.com',
+           pass: 'cnm123456789'
+       }
+   });
 
 exports.listUsers = function(req, res) {
     if (req.decoded.authority != "admin")
-        return;
+        res.status(403).send("You don't have permission for this page")
     User.find({}, function(err, result) {
         if (err) {
             res.send(err);
@@ -47,6 +57,30 @@ exports.addUser = function(req, res) {
         newAddress.save();
         newUser.address = newAddress.addressName;
         newUser.save();
+
+        // Send email for user
+        var key = utils().hash(newUser.publicKey).toString('hex');
+        var newKey = new UserVerifyKey({
+            hash: key,
+            user: newUser
+        })
+        newKey.save();
+        var link = "localhost:3000/api/user/" + newUser.id +'?verify=' + newKey.hash;
+        console.log(link);
+        //Create email's content 
+        const mailOptions = {
+            from: 'doan.cnm2018@email.com', // sender address
+            to: newUser.email, // list of receivers
+            subject: 'Verify your account', // Subject line
+            html: '<h1>Welcome you to my website</h1><p>Here is link to verify your account:</p><a href='+link+'>'+link+ '</a>'
+        };
+
+        transporter.sendMail(mailOptions, function (err, info) {
+            if(err)
+              console.log(err)
+            else
+              console.log(info);
+         });
     })
     .catch(error => {
         console.log(error);
@@ -96,7 +130,21 @@ exports.getUser = function(req, res) {
         if (err) {
             res.send(err);
         }
-        res.json(user);
+        UserVerifyKey.findOne({hash: req.query.verify}, function(err, result){
+            if (err || !result) {
+                res.status(404).send("Wrong verify key!")
+                return;
+            }
+            if (result.user != user.id) {
+                res.status(400).send("Wrong verify key for this account!")
+            }
+            else {
+                user.active = true;
+                user.save();
+                result.remove();
+                res.status(200).send("Your account now can use for our website! Welcom you!")
+            }
+        })
     });
 };
 
