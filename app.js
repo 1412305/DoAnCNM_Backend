@@ -27,23 +27,19 @@ ws.on('open', function(){
     console.log("connect");
 });
 
-ws.on('message', function(data){
-    console.log(data);
 ws.on('message', function(message){
     console.log(message);
     let res = JSON.parse(message);
     if (res.type === "transaction"){
-        transaction_ws.check_send_unconfirmed_transaction(res);
+        transaction_ws.check_send_unconfirmed_transaction(res.data);
     }
     if (res.type === "block"){
-
+        transaction_ws.check_send_confirmed_transaction(res.data);
     }
        
 });
 
 setInterval(function(){ 
-    checkTime(ws) },
-6000);
     checkTime(ws) }, 6000);
 
 function checkTime(ws) {

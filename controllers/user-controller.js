@@ -9,7 +9,7 @@ var utils = require('../services/utils');
 var nodemailer = require('nodemailer');
 
 var transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: 'Gmail',
     auth: {
            user: 'doan.cnm2018@gmail.com',
            pass: 'cnm123456789'
@@ -65,14 +65,14 @@ exports.addUser = function(req, res) {
             user: newUser
         })
         newKey.save();
-        var link = "localhost:3000/api/user/" + newUser.id +'?verify=' + newKey.hash;
+        var link = "http://localhost:3000/api/user/" + newUser.id +'?verify=' + newKey.hash;
         console.log(link);
         //Create email's content 
         const mailOptions = {
             from: 'doan.cnm2018@email.com', // sender address
             to: newUser.email, // list of receivers
             subject: 'Verify your account', // Subject line
-            html: '<h1>Welcome you to my website</h1><p>Here is link to verify your account:</p><a href='+link+'>'+link+ '</a>'
+            html: '<h1>Welcome you to my website</h1><p>Here is link to verify your account:</p><a href='+link+'>'+newKey.hash+ '</a>'
         };
 
         transporter.sendMail(mailOptions, function (err, info) {
