@@ -20,11 +20,14 @@ exports.listUsers = function(req, res) {
     if (req.decoded.authority != "admin")
         res.status(403).send("You don't have permission for this page")
     User.find({}, function(err, result) {
-        if (err) {
+        if (err || result.length == 0) {
             res.send(err);
         }
         responseData = [];
+        var i = 0;
+        var endOfLoop = result.length;
         result.forEach(function(element) {
+            i++;
             responseData.push({
                 email: element.email,
                 availableBalance: element.availableBalance,
@@ -32,6 +35,9 @@ exports.listUsers = function(req, res) {
                 authority: element.authority,
                 address: element.address
             });
+            if (i==endOfLoop) {
+                res.json(responseData);
+            }
         })
     });
 };
