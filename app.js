@@ -21,6 +21,7 @@ routes(app, express);
 
 const WebSocket = require('ws');
 var ws = new WebSocket('wss://api.kcoin.club');
+let transaction_ws = require('./controllers/transaction-ws-controller');
 
 ws.on('open', function(){
     console.log("connect");
@@ -28,21 +29,31 @@ ws.on('open', function(){
 
 ws.on('message', function(data){
     console.log(data);
+ws.on('message', function(message){
+    console.log(message);
+    let res = JSON.parse(message);
+    if (res.type === "transaction"){
+        transaction_ws.check_send_unconfirmed_transaction(res);
+    }
+    if (res.type === "block"){
+
+    }
+       
 });
 
 setInterval(function(){ 
     checkTime(ws) },
 6000);
+    checkTime(ws) }, 6000);
 
 function checkTime(ws) {
    ws.send("hello");
 }
-ws.on('disconnect', function(){ 
+
+ws.on('disconnect', function(){
     console.log("disconnect");
 });
-
 
 app.listen();
 
 module.exports = app;
-
