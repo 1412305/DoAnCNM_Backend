@@ -5,8 +5,8 @@ var schema = new Schema({
     hash: String,
     inputs: [{
         address: String,
-        referenceOutputHash: String,
-        referenceOutputIndex: Number
+        referencedOutputHash: String,
+        referencedOutputIndex: Number
     }],
     outputs: [{
         value: Number,
