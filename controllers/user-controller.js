@@ -20,11 +20,14 @@ exports.listUsers = function(req, res) {
     if (req.decoded.authority != "admin")
         res.status(403).send("You don't have permission for this page")
     User.find({}, function(err, result) {
-        if (err) {
+        if (err || result.length == 0) {
             res.send(err);
         }
         responseData = [];
+        var i = 0;
+        var endOfLoop = result.length;
         result.forEach(function(element) {
+            i++;
             responseData.push({
                 email: element.email,
                 availableBalance: element.availableBalance,
@@ -32,6 +35,9 @@ exports.listUsers = function(req, res) {
                 authority: element.authority,
                 address: element.address
             });
+            if (i==endOfLoop) {
+                res.json(responseData);
+            }
         })
     });
 };
@@ -81,20 +87,17 @@ exports.login = function(req, res) {
                 var token = jwt.sign(payload, 'superSecret', {
                     expiresIn: 86400 // expires in 24 hours
                 });
-
                 //Get address of user
-                Address.findById(user.address, function(err, address) {
                     res.json({
                         message: 'Enjoy your token!',
                         name: user.name,
                         email: user.email,
-                        address: address.addressName,
+                        address: user.address,
                         authority: user.authority,
                         availableBalance: user.availableBalance,
                         actualBalance: user.actualBalance,
                         token: token
                     });
-                })
             }
             else {
                 res.status(200).send({msg: "Invalid email or password!"});
