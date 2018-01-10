@@ -58,29 +58,7 @@ exports.addUser = function(req, res) {
         newUser.address = newAddress.addressName;
         newUser.save();
 
-        // Send email for user
-        var key = utils().hash(newUser.publicKey).toString('hex');
-        var newKey = new UserVerifyKey({
-            hash: key,
-            user: newUser
-        })
-        newKey.save();
-        var link = "http://localhost:3000/api/user/" + newUser.id +'?verify=' + newKey.hash;
-        console.log(link);
-        //Create email's content 
-        const mailOptions = {
-            from: 'doan.cnm2018@email.com', // sender address
-            to: newUser.email, // list of receivers
-            subject: 'Verify your account', // Subject line
-            html: '<h1>Welcome you to my website</h1><p>Here is link to verify your account:</p><a href='+link+'>'+newKey.hash+ '</a>'
-        };
-
-        transporter.sendMail(mailOptions, function (err, info) {
-            if(err)
-              console.log(err)
-            else
-              console.log(info);
-         });
+        sendEmailVerification(newUser);
     })
     .catch(error => {
         console.log(error);
@@ -132,17 +110,17 @@ exports.getUser = function(req, res) {
         }
         UserVerifyKey.findOne({hash: req.query.verify}, function(err, result){
             if (err || !result) {
-                res.status(404).send("Wrong verify key!")
+                res.status(200).send("Wrong verify key!")
                 return;
             }
             if (result.user != user.id) {
-                res.status(400).send("Wrong verify key for this account!")
+                res.status(200).send("Wrong verify key for this account!")
             }
             else {
                 user.active = true;
                 user.save();
                 result.remove();
-                res.status(200).send("Your account now can use for our website! Welcom you!")
+                res.status(200).send("Your account now can use for our website! Welcome!")
             }
         })
     });
@@ -164,3 +142,30 @@ exports.removeUser = function(req, res) {
         }
     });
 };
+
+function sendEmailVerification(newUser){
+    // Send email for user
+    var key = utils().hash(newUser.publicKey).toString('hex');
+    var newKey = new UserVerifyKey({
+        hash: key,
+        user: newUser
+    })
+    newKey.save();
+    
+    var link = "http://localhost:3000/api/user/" + newUser.id +'?verify=' + newKey.hash;
+    console.log(link);
+    //Create email's content 
+    const mailOptions = {
+        from: 'doan.cnm2018@email.com', // sender address
+        to: newUser.email, // list of receivers
+        subject: 'Verify your account', // Subject line
+        html: "<a href='" + link + "' method='POST'>" + newKey.hash +  "</a>"
+    };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+        if(err)
+          console.log(err)
+        else
+          console.log(info);
+     });
+}

@@ -14,6 +14,7 @@ var createDataForTransaction = function(res, listAddressSend, listAddressReceive
         "version": 1
     }
 
+    //add received address
     listAddressReceive.forEach(function(element) {
         transactionData.outputs.push({
             "value": parseInt(element.value),
@@ -38,8 +39,8 @@ var createDataForTransaction = function(res, listAddressSend, listAddressReceive
             let inputStrings = await getInputStrings(result, address, addressBalance);
             let keys = await getPublicKeys(element);
             inputStrings.forEach(function(item){
-                // transactionData.inputs.push(item);
-                // keyList.push(keys[0]);
+                transactionData.inputs.push(item);
+                keyList.push(keys[0]);
                 var data = transactionService().sign(item, keys);
                 // console.log(data);
             })
@@ -145,27 +146,34 @@ exports.createTransaction = function(req, res) {
     let receiveAddress = req.body.address
     
     if (!(totalValue && receiveAddress)) {
-        res.status(400).json("Missing data for transaction")
+        res.status(200).json("Missing data for transaction")
     }
     
     Address.find().exec(function(err, addresses) {
         let listAddress = [];
         let excessAddress = '';
+
+        //sort descending by balance
         addresses.sort(function(a, b) {
             return b.balance - a.balance;
         })
-        for (var i=0; i < addresses.length; i++) {
+
+        for (let i=0; i < addresses.length; i++) {
+            //if address have balance > 0
             if (addresses[i].balance > 0) {
                 totalValue -= addresses[i].balance;
                 listAddress.push(addresses[i]);
+
                 if (totalValue <= 0) {
-                    if (i != addresses.length-1) {
-                        excessAddress = addresses[i+1].addressName;
+                    if (i != addresses.length - 1) {
+                        excessAddress = addresses[i + 1].addressName;
                     }
                     break;
                 }
-            } else continue;
+                
+            }
         }
+
         if (totalValue > 0)
             res.status(400).send({
                 "msg": "Invalid value!"

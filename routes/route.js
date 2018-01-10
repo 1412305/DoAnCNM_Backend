@@ -10,7 +10,7 @@ module.exports = function(app, express) {
     apiRoutes.route('/users').post(userController.addUser);
 
     apiRoutes.route('/user/:id')
-        .get(userController.getUser)
+        .post(userController.getUser)
     // route middleware to verify a token
     apiRoutes.use(function(req, res, next) {
 

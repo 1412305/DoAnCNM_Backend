@@ -43,7 +43,7 @@ setInterval(function(){
     checkTime(ws) }, 6000);
 
 function checkTime(ws) {
-   ws.send("hello");
+    ws.send("hello");
 }
 
 ws.on('disconnect', function(){

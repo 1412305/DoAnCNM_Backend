@@ -48,33 +48,70 @@ function checkSendConfirmedTransaction(transactions){
             //change status to confirmed
             if (t){
                 t.status = "confirmed";
-                t.save();
-                console.log(t);
+                t.balance = 0;
+                t.save(function(err, tx){
+                    if (err) return;
+                    console.log(tx);
+                    User.findById(t.ofUser, function(err, user){
+                        if (err) return;
+                        //if found
+                        if (user){
+                            //update user balance
+                            user.actualBalance = user.availableBalance;
+                            user.save()
+                        }
+                    });
+                });
             }
         });
     });
 }
 
-function checkReceiveConfirmedTransaction(transactions){
-    transactions.forEach((e) => {
+async function checkReceiveConfirmedTransaction(transactions){
+    
+    await Promise.all(transactions.map( (e, i) => {
         //if a transaction hash match with transaction in db
-        Address.findOne({'addressName': decodeScript(e.lockScript)}, async (err, t) => {
-            if (err) return;
-            //create new received transaction
-            if (t){
-                let new_transaction = new Transaction();
-                new_transaction.hash = e.hash;
-                new_transaction.inputs = await getInputs(e.inputs);
-                new_transaction.outputs = getOutputs(e.outputs);
-                new_transaction.status = "received";
-                //create new transaction
-                new_transaction.save(function(err, transaction){
-                    if (err) return;
-                    console.log(transaction);
-                });
-            }
-        });
-    });
+        
+        let addressNames = [];
+        e.outputs.forEach(async (output) => {
+            let addressName = decodeScript(output.lockScript);
+    
+            Address.findOne({'addressName':addressName}, async (err, t) => {
+                if (err) return;
+               
+                if (t){
+                    if (!addressNames.includes(addressName))
+                    {
+                        addressNames.push(addressName);
+                        let new_transaction = new Transaction();
+                        new_transaction.hash = e.hash;
+                        new_transaction.inputs = await getInputs(e.inputs);
+                        new_transaction.outputs = getOutputs(e.outputs);
+                        new_transaction.status = "received";
+                        //create new transaction
+                        new_transaction.save(function(err, transaction){
+                            if (err) return;
+                            console.log(transaction);
+                        });
+                    }
+                  
+                    User.findById(t.ofUser, function(err, user){
+                        if (err) return;
+                        //if found
+                        if (user){
+                            //update user balance
+                            t.balance += output.value;
+                            t.save();
+                            user.actualBalance += output.value;
+                            user.actualBalance = user.availableBalance;
+                            user.save()
+                        }
+                    });
+                }
+            })
+        })
+    }));
+       
 }
 
 //decode script of in to get public key
